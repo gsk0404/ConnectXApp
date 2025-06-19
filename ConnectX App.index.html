@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectX - Swipe. Match. Collaborate.</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .wireframe-phone {
+            max-width: 300px;
+            background: #f8f9fa;
+            border: 8px solid #333;
+            border-radius: 25px;
+            padding: 20px;
+            margin: 0 auto;
+        }
+        .wireframe-screen {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 500px;
+        }
+        .swipe-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .swipe-card:hover {
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin: 5px 0;
+        }
+        .chat-sent {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+        }
+        .chat-received {
+            background: #f1f5f9;
+            color: #1f2937;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-handshake text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">ConnectX</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#home" class="nav-link text-gray-600 hover:text-purple-600 transition">Home</a>
+                    <a href="#features" class="nav-link text-gray-600 hover:text-purple-600 transition">Features</a>
+                    <a href="#how-it-works" class="nav-link text-gray-600 hover:text-purple-600 transition">How It Works</a>
+                    <button onclick="openWireframe()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-mobile-alt mr-2"></i>View Wireframe
+                    </button>
+                </div>
+                <button class="md:hidden" onclick="toggleMenu()">
+                    <i class="fas fa-bars text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-white z-40 transform -translate-x-full transition-transform md:hidden">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <span class="text-xl font-bold">Menu</span>
+                <button onclick="toggleMenu()">
+                    <i class="fas fa-times text-gray-600"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <a href="#home" class="block text-gray-600 hover:text-purple-600 py-2">Home</a>
+                <a href="#features" class="block text-gray-600 hover:text-purple-600 py-2">Features</a>
+                <a href="#how-it-works" class="block text-gray-600 hover:text-purple-600 py-2">How It Works</a>
+                <button onclick="openWireframe()" class="w-full bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-mobile-alt mr-2"></i>View Wireframe
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg text-white pt-20">
+        <div class="container mx-auto px-4 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="flex items-center space-x-4 mb-6">
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                            <i class="fas fa-users mr-2"></i>10k+ Beta Users
+                        </span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                            <i class="fas fa-star mr-2"></i>4.8/5 Rating
+                        </span>
+                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Swipe. Match. <span class="text-yellow-300">Collaborate.</span>
+                    </h1>
+                    <p class="text-xl mb-8 opacity-90">
+                        Connect with professionals based on skills and shared goals. The future of networking is here.
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button onclick="joinBeta()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition flex items-center justify-center">
+                            <i class="fas fa-rocket mr-2"></i>Join Beta Now
+                        </button>
+                        <button onclick="openWireframe()" class="border-2 border-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition flex items-center justify-center">
+                            <i class="fas fa-play mr-2"></i>View Demo
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-3xl p-8 max-w-sm mx-auto">
+                        <div class="bg-white rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold">SC</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Sarah Chen</h3>
+                                    <p class="text-gray-600 text-sm">UX Designer</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2 mb-4">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">React</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Figma</span>
+                            </div>
+                            <div class="flex justify-center space-x-4">
+                                <button class="w-12 h-12 bg-red-500 rounded-full text-white hover:bg-red-600 transition">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="w-12 h-12 bg-green-500 rounded-full text-white hover:bg-green-600 transition">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Three simple steps to connect with amazing professionals and grow your network
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center feature-card bg-gray-50 p-8 rounded-2xl">
+                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-user-plus text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">1. Create Profile</h3>
+                    <p class="text-gray-600">
+                        Set up your professional profile with skills, interests, and what you're looking for. Our AI helps optimize your bio.
+                    </p>
+                </div>
+                <div class="text-center feature-card bg-gray-50 p-8 rounded-2xl">
+                    <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-hand-pointer text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">2. Swipe to Match</h3>
+                    <p class="text-gray-600">
+                        Browse through professionals tailored to your goals. Swipe right to connect, left to pass. It's that simple.
+                    </p>
+                </div>
+                <div class="text-center feature-card bg-gray-50 p-8 rounded-2xl">
+                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-comments text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">3. Start Chatting</h3>
+                    <p class="text-gray-600">
+                        When you both swipe right, start meaningful conversations. Share projects, opportunities, and collaborate.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Why Choose ConnectX?</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Built for the modern professional with cutting-edge features that make networking effortless
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-heart text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Swipe-Based Networking</h3>
+                    <p class="text-gray-600 text-sm">Familiar, intuitive interface that makes professional networking as easy as dating apps.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-robot text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">AI-Powered Assistance</h3>
+                    <p class="text-gray-600 text-sm">Get help writing bios, conversation starters, and personalized networking advice.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-bullseye text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Smart Matching</h3>
+                    <p class="text-gray-600 text-sm">Advanced algorithms suggest connections based on skills, goals, and compatibility.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-comments text-orange-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Built-in Messaging</h3>
+                    <p class="text-gray-600 text-sm">Seamless chat experience with file sharing, video calls, and collaboration tools.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Target Users -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Perfect for Every Professional</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Whether you're starting out or scaling up, ConnectX connects you with the right people
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Students</h3>
+                    <p class="text-gray-600">Find mentors, internships, and study groups. Build your professional network early.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-laptop-code text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Freelancers</h3>
+                    <p class="text-gray-600">Connect with clients, collaborators, and other freelancers. Grow your business network.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chalkboard-teacher text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Mentors</h3>
+                    <p class="text-gray-600">Share your expertise and guide the next generation of professionals.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-search text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Recruiters</h3>
+                    <p class="text-gray-600">Discover top talent and build relationships with potential candidates.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 hero-bg text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6">Ready to Transform Your Networking?</h2>
+            <p class="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+                Join thousands of professionals who are already building meaningful connections through ConnectX
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+                <button onclick="joinBeta()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fas fa-rocket mr-2"></i>Join Beta Now
+                </button>
+                <button onclick="openWireframe()" class="border-2 border-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition flex items-center justify-center">
+                    <i class="fas fa-mobile-alt mr-2"></i>View App Demo
+                </button>
+            </div>
+            <div class="flex justify-center space-x-6 text-sm opacity-75">
+                <span><i class="fas fa-check-circle mr-2"></i>No credit card required</span>
+                <span><i class="fas fa-users mr-2"></i>Join 10,000+ beta users</span>
+                <span><i class="fas fa-mobile-alt mr-2"></i>Available on iOS & Android soon</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-handshake text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold">ConnectX</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">The future of professional networking is here.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">About</a></li>
+                        <li><a href="#" class="hover:text-white transition">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 ConnectX. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Wireframe Modal -->
+    <div id="wireframe-modal" class="modal">
+        <div class="bg-white rounded-2xl p-6 max-w-6xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">ConnectX Mobile Wireframe</h2>
+                <button onclick="closeWireframe()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Wireframe Tabs -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="showScreen('login')" class="tab-button active px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm">Login</button>
+                <button onclick="showScreen('role')" class="tab-button px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm">Role Selection</button>
+                <button onclick="showScreen('profile')" class="tab-button px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm">Create Profile</button>
+                <button onclick="showScreen('swipe')" class="tab-button px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm">Swipe Interface</button>
+                <button onclick="showScreen('chat')" class="tab-button px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm">Chat</button>
+                <button onclick="showScreen('dashboard')" class="tab-button px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm">Dashboard</button>
+            </div>
+
+            <!-- Wireframe Screens -->
+            <div class="wireframe-phone">
+                <!-- Login Screen -->
+                <div id="screen-login" class="wireframe-screen">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gray-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-handshake text-gray-600 text-2xl"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-800">ConnectX</h1>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="w-full h-12 bg-gray-100 border border-gray-300 rounded-lg flex items-center px-4">
+                                <span class="text-gray-500 text-sm">Email address</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="w-full h-12 bg-gray-100 border border-gray-300 rounded-lg flex items-center px-4">
+                                <span class="text-gray-500 text-sm">Password</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-gray-800 text-white py-3 rounded-lg font-semibold">
+                            Login
+                        </button>
+                        <div class="text-center text-gray-500 text-sm">or</div>
+                        <button class="w-full bg-white border border-gray-300 py-3 rounded-lg font-semibold flex items-center justify-center">
+                            <i class="fab fa-google mr-2 text-red-500"></i>
+                            Continue with Google
+                        </button>
+                        <div class="text-center mt-4">
+                            <button class="text-blue-600 text-sm">Create account</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Selection Screen -->
+                <div id="screen-role" class="wireframe-screen hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-xl font-bold text-gray-800">Choose your role</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <button class="w-full bg-white border-2 border-gray-300 py-6 rounded-lg font-semibold text-left px-6 hover:border-blue-500 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-graduation-cap text-blue-600 text-xl mr-4"></i>
+                                <span>Student</span>
+                            </div>
+                        </button>
+                        <button class="w-full bg-white border-2 border-gray-300 py-6 rounded-lg font-semibold text-left px-6 hover:border-purple-500 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-laptop-code text-purple-600 text-xl mr-4"></i>
+                                <span>Freelancer</span>
+                            </div>
+                        </button>
+                        <button class="w-full bg-white border-2 border-gray-300 py-6 rounded-lg font-semibold text-left px-6 hover:border-green-500 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-chalkboard-teacher text-green-600 text-xl mr-4"></i>
+                                <span>Mentor</span>
+                            </div>
+                        </button>
+                        <button class="w-full bg-white border-2 border-gray-300 py-6 rounded-lg font-semibold text-left px-6 hover:border-orange-500 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-search text-orange-600 text-xl mr-4"></i>
+                                <span>Recruiter</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Create Profile Screen -->
+                <div id="screen-profile" class="wireframe-screen hidden">
+                    <div class="text-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-800">Create Profile</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-center mb-6">
+                            <div class="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center">
+                                <i class="fas fa-camera text-gray-500"></i>
+                            </div>
+                            <button class="text-blue-600 text-sm">Upload Photo</button>
+                        </div>
+                        <div>
+                            <div class="w-full h-10 bg-gray-100 border border-gray-300 rounded-lg flex items-center px-3">
+                                <span class="text-gray-500 text-sm">Full Name</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="w-full h-20 bg-gray-100 border border-gray-300 rounded-lg flex items-start px-3 py-3">
+                                <span class="text-gray-500 text-sm">Short Bio</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="w-full h-10 bg-gray-100 border border-gray-300 rounded-lg flex items-center px-3">
+                                <span class="text-gray-500 text-sm">Skills (multi-select)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="w-full h-10 bg-gray-100 border border-gray-300 rounded-lg flex items-center px-3">
+                                <span class="text-gray-500 text-sm">Interests</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="w-full h-10 bg-gray-100 border border-gray-300 rounded-lg flex items-center px-3">
+                                <span class="text-gray-500 text-sm">LinkedIn URL</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-gray-800 text-white py-3 rounded-lg font-semibold mt-6">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Swipe Interface Screen -->
+                <div id="screen-swipe" class="wireframe-screen hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-800">Discover</h2>
+                        <i class="fas fa-sliders-h text-gray-500"></i>
+                    </div>
+                    <div class="swipe-card">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
+                                <span class="text-gray-600 font-bold text-sm">AK</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">Alex Kumar</h3>
+                                <p class="text-gray-600 text-sm">Full Stack Developer</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Node.js</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Python</span>
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">React</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Looking for freelance projects and collaboration opportunities...</p>
+                        <div class="flex justify-center space-x-6">
+                            <button class="w-12 h-12 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button class="w-12 h-12 bg-green-100 text-green-600 rounded-full hover:bg-green-200 transition">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+                        <div class="flex justify-center space-x-8">
+                            <button class="flex flex-col items-center text-blue-600">
+                                <i class="fas fa-home text-xl mb-1"></i>
+                                <span class="text-xs">Home</span>
+                            </button>
+                            <button class="flex flex-col items-center text-gray-400">
+                                <i class="fas fa-heart text-xl mb-1"></i>
+                                <span class="text-xs">Matches</span>
+                            </button>
+                            <button class="flex flex-col items-center text-gray-400">
+                                <i class="fas fa-comments text-xl mb-1"></i>
+                                <span class="text-xs">Messages</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Screen -->
+                <div id="screen-chat" class="wireframe-screen hidden">
+                    <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                        <button class="mr-3">
+                            <i class="fas fa-arrow-left text-gray-600"></i>
+                        </button>
+                        <div class="w-10 h-10 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
+                            <span class="text-gray-600 font-bold text-sm">AK</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Alex Kumar</h3>
+                            <p class="text-gray-500 text-sm">Online</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 mb-20">
+                        <div class="chat-bubble chat-received">
+                            <p class="text-sm">Hey! Thanks for connecting. I saw your portfolio and I'm impressed!</p>
+                        </div>
+                        <div class="chat-bubble chat-sent">
+                            <p class="text-sm">Thank you! I'd love to learn more about your projects.</p>
+                        </div>
+                        <div class="chat-bubble chat-received">
+                            <p class="text-sm">Sure! Are you available for a quick call this week?</p>
+                        </div>
+                    </div>
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+                        <div class="flex space-x-3">
+                            <div class="flex-1 bg-gray-100 rounded-full px-4 py-2">
+                                <span class="text-gray-500 text-sm">Type a message...</span>
+                            </div>
+                            <button class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-paper-plane text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Screen -->
+                <div id="screen-dashboard" class="wireframe-screen hidden">
+                    <div class="mb-6">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Dashboard</h2>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
+                                    <span class="text-gray-600 font-bold">You</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">Your Profile</h3>
+                                    <p class="text-gray-600 text-sm">UX Designer</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-4 text-sm text-gray-600">
+                                <span>12 Connections</span>
+                                <span>5 New Matches</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="font-semibold mb-3">Your Connections</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
+                                    <span class="text-gray-600 font-bold text-sm">AK</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Alex Kumar</h4>
+                                    <p class="text-gray-600 text-sm">Full Stack Developer</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
+                                    <span class="text-gray-600 font-bold text-sm">MJ</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Maria Johnson</h4>
+                                    <p class="text-gray-600 text-sm">Product Manager</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-3">Suggested Matches</h3>
+                        <div class="bg-blue-50 p-3 rounded-lg text-center">
+                            <p class="text-blue-800 text-sm">3 new matches waiting for you!</p>
+                            <button class="text-blue-600 text-sm font-semibold mt-1">View Matches</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('-translate-x-full');
+        }
+
+        // Wireframe modal functions
+        function openWireframe() {
+            document.getElementById('wireframe-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWireframe() {
+            document.getElementById('wireframe-modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Screen switching in wireframe
+        function showScreen(screenName) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.wireframe-screen');
+            screens.forEach(screen => screen.classList.add('hidden'));
+            
+            // Show selected screen
+            document.getElementById(`screen-${screenName}`).classList.remove('hidden');
+            
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Join beta function
+        function joinBeta() {
+            alert('🎉 Welcome to ConnectX Beta! \n\nYou\'ll be notified when the app launches. \n\n📧 Check your email for next steps.');
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                // Close mobile menu if open
+                document.getElementById('mobile-menu').classList.add('-translate-x-full');
+            });
+        });
+
+        // Add click handlers for swipe cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const swipeCards = document.querySelectorAll('.swipe-card');
+            swipeCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1.02)';
+                    }, 100);
+                });
+            });
+
+            // Add animation to feature cards
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe feature cards
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('wireframe-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWireframe();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeWireframe();
+            }
+        });
+    </script>
+</body>
+</html>
